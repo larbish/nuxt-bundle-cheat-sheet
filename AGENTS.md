@@ -14,6 +14,7 @@ A one-page reference on how a Nuxt bundle loads: the kinds of chunks Vite writes
   - Chunk contents: build with `sourcemap: { client: true }` and read the `sources` of each chunk's `.map`.
   - Tag lists: read every `/_nuxt/` `<script>` and `<link>` of the HTML and match each file to the client manifest (`.nuxt/dist/server/client.manifest.mjs`) to get its kind.
   - Static vs SSR: diff the tags of the prerendered file in `.output/public` against the SSR response of `node .output/server/index.mjs` for the same URL.
+  - Server side: read the server chunks in `.output/server/chunks/build`, where a page loads its lazy components with a local `import('./Foo-hash.mjs')`.
   - What waits: put a proxy in front of the server that delays one chunk by 3 s, click a button next to the component every 50 ms in Chromium, and record `app:mounted`, `app:suspense:resolve`, `page:finish` and `onNuxtReady` from a client plugin.
 - Wording: "static" and "dynamic" describe an import, not a chunk. "Lazy" means every path from the entry crosses an `import()`, as defined in the "Kinds of chunks" section. Chunks a URL loads beyond its route are the lazy components the page rendered.
 - Examples use the playground only. Say each thing once: don't restate a table's content in another section.
