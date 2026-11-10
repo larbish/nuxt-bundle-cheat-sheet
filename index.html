@@ -427,7 +427,7 @@
   const kinds = [
     // [vite kind, nuxt kind, imported with, lazy, playground /chart preloads]
     ['Entry<span class="sub"><code>isEntry: true</code></span>', 'Entry', 'Nothing: the HTML starts it', 'No', 1],
-    ['Shared<span class="sub">Neither flag. Key starts with <code>_</code>, no <code>src</code></span>', 'No Nuxt name: code several chunks import, like <code>utils.js</code> in the playground', 'Static <code>import</code> only', 'Only if lazy chunks alone import it', 6],
+    ['Shared<span class="sub">Neither flag. Key starts with <code>_</code>, no <code>src</code></span>', 'Utils files imported by several chunks', 'Static <code>import</code> only', 'Only if lazy chunks alone import it', 6],
     ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Page, used by a route', '<code>import()</code> from the router', 'Yes', 1],
     ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Layout, under <code>layouts/</code>', '<code>import()</code> in <code>defineAsyncComponent</code>', 'Yes', 1],
     ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Component, or any other <code>import()</code> target', '<code>import()</code>: <code>&lt;LazyFoo&gt;</code>, global components', 'Yes', 1],
