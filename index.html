@@ -747,8 +747,8 @@
   /* Static, SSR, SPA */
   // [question, static, ssr, spa]. Rows where all three cells match are marked the same.
   const modes = [
-    ['When the HTML is made', 'Once, at build time', 'On every request', 'Once, at build time'],
-    ['First byte', 'A static file, often from a CDN', 'After the server renders', 'A static file, often from a CDN'],
+    ['When the HTML is made', 'Once, at build time', 'On every request', 'Never: no page is rendered to HTML, every URL gets the same shell'],
+    ['First byte', 'A static file, often from a CDN', 'After the server renders', 'Right away: the shell needs no rendering'],
     ['What the HTML contains', 'The rendered page', 'The rendered page', 'An empty <code>&lt;div id="__nuxt"&gt;</code>, the same for every URL'],
     ['Entry and its static imports', '<code>script</code> and <code>modulepreload</code>', '<code>script</code> and <code>modulepreload</code>', '<code>script</code> and <code>modulepreload</code>'],
     ['Layout and page of the URL, with their shared chunks', '<code>modulepreload</code>', '<code>modulepreload</code>', 'Not in the HTML: fetched after the entry runs'],
