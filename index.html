@@ -149,33 +149,6 @@
   .pill.wait::before { background: var(--route); }
   .pill.wait.added::before { background: var(--added); }
 
-  /* Measured */
-  .runs { display: grid; gap: 16px; }
-  .run { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; align-items: start; padding: 16px 20px; border-bottom: 1px solid var(--border); }
-  .run:last-child { border-bottom: 0; }
-  .run-k { font-weight: 600; font-size: 14px; }
-  .run-k .sub { display: block; font-weight: 400; font-size: 12.5px; color: var(--muted); margin-top: 2px; }
-  .run-track { position: relative; height: 28px; margin: 4px 0 10px; }
-  .run-track::before, .run-track::after { content: ""; position: absolute; top: 13px; height: 2px; border-radius: 2px; background: var(--border); }
-  .run-track::before { left: 0; width: 38%; }
-  .run-track::after { left: 46%; right: 0; }
-  .run-break { position: absolute; left: 40.5%; top: 6px; width: 3%; height: 16px; background: linear-gradient(115deg, transparent 0 30%, var(--faint) 30% 38%, transparent 38% 62%, var(--faint) 62% 70%, transparent 70%); }
-  .dot { z-index: 1; position: absolute; top: 7px; width: 14px; height: 14px; margin-left: -7px; border-radius: 50%; background: var(--bg); box-shadow: 0 0 0 2px var(--fg); }
-  .dot.route { box-shadow: 0 0 0 2px var(--route); background: var(--route); }
-  .dot.added { box-shadow: 0 0 0 2px var(--added); background: var(--added); }
-  .dot.idle { box-shadow: 0 0 0 2px var(--context); }
-  .run-list { display: grid; gap: 3px; font-size: 13px; color: var(--muted); }
-  .run-list span { display: flex; gap: 8px; align-items: baseline; }
-  .run-list b { font: 500 12.5px var(--mono); color: var(--fg); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums; }
-  .run-list i { width: 8px; height: 8px; border-radius: 50%; flex: none; display: inline-block; align-self: center; background: var(--fg); }
-  .run-list i.route { background: var(--route); }
-  .run-list i.added { background: var(--added); }
-  .run-list i.idle { background: transparent; box-shadow: inset 0 0 0 1.5px var(--context); }
-  .run-axis { position: relative; height: 18px; font: 11px var(--mono); color: var(--faint); margin: 0 20px 14px 260px; }
-  .run-axis span { position: absolute; transform: translateX(-50%); white-space: nowrap; }
-  .run-axis span:first-child { transform: none; }
-  .run-axis span:last-child { transform: translateX(-100%); }
-
   .rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .rule { padding: 16px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--border); }
   .rule .k { font-weight: 600; font-size: 14px; margin-bottom: 4px; display: flex; gap: 10px; align-items: baseline; }
@@ -209,9 +182,6 @@
     .tl-marks { left: 96px; }
     .tl-axis { margin-left: 96px; }
     .tl-mark span { font-size: 11px; }
-    .run { grid-template-columns: minmax(0, 1fr); gap: 8px; padding: 14px; }
-    .run-axis { margin: 0 14px 12px; }
-    .run-axis .minor { display: none; }
     .table.stack td:empty { display: none; }
     .rules { grid-template-columns: minmax(0, 1fr); }
     dl.defs { grid-template-columns: minmax(0, 1fr); gap: 2px; }
@@ -245,7 +215,6 @@
       <a href="#demo">Playground</a>
       <a href="#load">Blocking</a>
       <a href="#modes">Modes</a>
-      <a href="#measured">Measured</a>
       <a href="#rules">Rules</a>
     </nav>
     <button class="theme" id="theme" aria-label="Toggle dark mode" title="Toggle dark mode">
@@ -263,7 +232,7 @@
     <h2>Kinds of chunks</h2>
     <p class="intro">Vite sorts chunks into three kinds, with flags in its build manifest, which Nuxt keeps as <code>.nuxt/dist/server/client.manifest.mjs</code>. Nuxt splits Vite's dynamic entries by their source file.</p>
     <div class="table stack"><table>
-      <thead><tr><th>Vite kind</th><th>Nuxt kind</th><th>Imported with</th><th>Lazy</th><th class="num">Playground <code>/chart</code> preloads</th></tr></thead>
+      <thead><tr><th>Vite kind</th><th>Nuxt kind</th><th>Imported with</th><th>Lazy</th><th>In the playground's <code>/chart</code></th></tr></thead>
       <tbody id="kinds-body"></tbody>
     </table></div>
     <h3>Static, dynamic, shared, lazy</h3>
@@ -280,14 +249,14 @@
     <h2>Where your code ends up</h2>
     <p class="intro">Which chunk a file lands in depends only on how it's imported. Nuxt already splits by route: the router loads every page and layout with <code>import()</code>.</p>
     <div class="table stack"><table>
-      <thead><tr><th>How it's imported</th><th>Where it ends up</th><th>Example</th></tr></thead>
+      <thead><tr><th>How it's imported</th><th>Where it ends up</th><th>Lazy</th><th>Blocks page hydration</th><th>Example</th></tr></thead>
       <tbody>
-        <tr><td class="k">Statically by the entry</td><td data-label="Where it ends up">The entry chunk</td><td data-label="Example"><code>app.vue</code>, plugins, <code>AppHeader.vue</code></td></tr>
-        <tr><td class="k">Statically by one page only</td><td data-label="Where it ends up">That page's chunk</td><td data-label="Example">A <code>Button.vue</code> only <code>pages/a.vue</code> imports</td></tr>
-        <tr><td class="k">Statically by several dynamic chunks, not the entry</td><td data-label="Where it ends up">A shared chunk</td><td data-label="Example"><code>utils.js</code>, imported by <code>a.js</code> and <code>b.js</code></td></tr>
-        <tr><td class="k">Statically by dynamic chunks and the entry</td><td data-label="Where it ends up">The entry chunk</td><td data-label="Example">The other chunks import it from there</td></tr>
-        <tr><td class="k">Dynamically</td><td data-label="Where it ends up">Its own chunk, a dynamic entry</td><td data-label="Example"><code>import()</code>, <code>defineAsyncComponent</code>, <code>&lt;LazyFoo&gt;</code>, global components</td></tr>
-        <tr><td class="k">Matched by a <code>codeSplitting</code> group<span class="sub"><code>vite.build.rolldownOptions.output</code>, formerly <code>manualChunks</code></span></td><td data-label="Where it ends up">The chunk the group names, before every rule above</td><td data-label="Example">A <code>vendor</code> group for <code>node_modules</code>: the entry imports it, so every page loads it</td></tr>
+        <tr><td class="k">Statically by the entry only</td><td data-label="Where it ends up">The entry chunk</td><td data-label="Lazy">No</td><td data-label="Blocks page hydration">Yes, on every page</td><td data-label="Example"><code>app.vue</code>, Nuxt's plugins</td></tr>
+        <tr><td class="k">Statically by the entry and dynamic chunks</td><td data-label="Where it ends up">The entry chunk, or a shared chunk the entry imports</td><td data-label="Lazy">No</td><td data-label="Blocks page hydration">Yes, on every page</td><td data-label="Example">Vue and Vue Router, in shared chunks the entry imports</td></tr>
+        <tr><td class="k">Statically by one page or layout only</td><td data-label="Where it ends up">That page's or layout's chunk</td><td data-label="Lazy">Yes</td><td data-label="Blocks page hydration">Yes, on the URLs that use it</td><td data-label="Example"><code>AppFooter.vue</code>, in the chunk of <code>layouts/default.vue</code></td></tr>
+        <tr><td class="k">Statically by several dynamic chunks, not the entry</td><td data-label="Where it ends up">A shared chunk</td><td data-label="Lazy">Yes</td><td data-label="Blocks page hydration">Where its importers do</td><td data-label="Example"><code>AppHeader.vue</code>, imported by both layouts</td></tr>
+        <tr><td class="k">Dynamically</td><td data-label="Where it ends up">Its own chunk, a dynamic entry</td><td data-label="Lazy">Yes</td><td data-label="Blocks page hydration">Only as the URL's page or layout. A rendered lazy component holds up only itself.</td><td data-label="Example"><code>&lt;LazyHeavyChart&gt;</code>, <code>pages/chart.vue</code></td></tr>
+        <tr><td class="k">Matched by a <code>codeSplitting</code> group<span class="sub"><code>vite.build.rolldownOptions.output</code>, formerly <code>manualChunks</code></span></td><td data-label="Where it ends up">The chunk the group names, before every rule above</td><td data-label="Lazy">No, once the entry imports it</td><td data-label="Blocks page hydration">Where its importers do</td><td data-label="Example">A <code>vendor</code> group for <code>node_modules</code>: the entry imports it, so every page loads it</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -327,7 +296,7 @@
         </div>
 
         <div class="tl">
-          <div class="tl-head"><h3>What the browser does</h3><span class="small">Illustrative timings. Real measurements are <a href="#measured">below</a>.</span></div>
+          <div class="tl-head"><h3>What the browser does</h3><span class="small">Illustrative timings.</span></div>
           <div class="tl-body" id="tl-body"></div>
           <div class="tl-axis" id="tl-axis"></div>
         </div>
@@ -361,12 +330,6 @@
       <thead><tr><th>Question</th><th>Static</th><th>SSR</th><th>SPA</th></tr></thead>
       <tbody></tbody>
     </table></div>
-  </section>
-
-  <section id="measured">
-    <h2>Measured, not guessed</h2>
-    <p class="intro">Nuxt 4.6.3 production builds in Chromium. A proxy delayed the chunk of a dynamic <code>HeavyChart</code> component by 3 s, and a button next to it was clicked every 50 ms. The axis is cut between 600 ms and 3.1 s.</p>
-    <div class="panel" id="runs"></div>
   </section>
 
   <section id="rules">
@@ -425,22 +388,21 @@
 
   /* Chunk kinds */
   const kinds = [
-    // [vite kind, nuxt kind, imported with, lazy, playground /chart preloads]
-    ['Entry<span class="sub"><code>isEntry: true</code></span>', 'Entry', 'Nothing: the HTML starts it', 'No', 1],
-    ['Shared<span class="sub">Neither flag. Key starts with <code>_</code>, no <code>src</code></span>', 'Utils files imported by several chunks', 'Static <code>import</code> only', 'Only if lazy chunks alone import it', 6],
-    ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Page, used by a route', '<code>import()</code> from the router', 'Yes', 1],
-    ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Layout, under <code>layouts/</code>', '<code>import()</code> in <code>defineAsyncComponent</code>', 'Yes', 1],
-    ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Component, or any other <code>import()</code> target', '<code>import()</code>: <code>&lt;LazyFoo&gt;</code>, global components', 'Yes', 1],
-    ['Worker<span class="sub">Built as its own file</span>', 'No Nuxt name', '<code>new Worker()</code>', 'Yes', 0],
+    // [vite kind, nuxt kind, imported with, lazy, source files in the playground's /chart]
+    ['Entry<span class="sub"><code>isEntry: true</code></span>', 'Entry', 'Nothing: the HTML starts it', 'No', '<code>app.vue</code>, Nuxt\'s runtime and plugins'],
+    ['Shared<span class="sub">Neither flag. Key starts with <code>_</code>, no <code>src</code></span>', 'Utils files imported by several chunks', 'Static <code>import</code> only', 'Only if lazy chunks alone import it', 'Lazy: <code>AppHeader.vue</code>, which both layouts import, and the <code>useCart.ts</code> it uses. Not lazy: Vue, Vue Router and Nuxt\'s core, which the entry imports.'],
+    ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Page, used by a route', '<code>import()</code> from the router', 'Yes', '<code>pages/chart.vue</code>'],
+    ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Layout, under <code>layouts/</code>', '<code>import()</code> in <code>defineAsyncComponent</code>', 'Yes', '<code>layouts/default.vue</code>, with <code>AppFooter.vue</code>'],
+    ['Dynamic entry<span class="sub"><code>isDynamicEntry: true</code></span>', 'Component, or any other <code>import()</code> target', '<code>import()</code>: <code>&lt;LazyFoo&gt;</code>, global components', 'Yes', '<code>components/HeavyChart.vue</code>, with <code>fast-check</code>'],
   ]
-  $('kinds-body').innerHTML = kinds.map(([vite, nuxt, imported, lazy, chart]) => `
+  $('kinds-body').innerHTML = kinds.map(([vite, nuxt, imported, lazy, example]) => `
     <tr>
       <td class="k">${vite}</td>
       <td data-label="Nuxt kind">${nuxt}</td>
       <td data-label="Imported with">${imported}</td>
       <td data-label="Lazy">${lazy}</td>
-      <td data-label="Playground /chart preloads" class="num">${chart}</td>
-    </tr>`).join('') + `<tr><td class="k">Total</td><td data-label="Nuxt kind"></td><td data-label="Imported with"></td><td data-label="Lazy"></td><td data-label="Playground /chart preloads" class="num">${kinds.reduce((sum, row) => sum + row[4], 0)}</td></tr>`
+      <td data-label="In the playground's /chart">${example}</td>
+    </tr>`).join('')
 
   /* Playground */
   const nodes = {
@@ -458,7 +420,7 @@
   ]
   const cols = ['entry', 'pages', 'imports']
 
-  // Status per chunk: [role, tag]. Timings in ms are illustrative, in the order the measured runs showed.
+  // Status per chunk: [role, tag]. Timings in ms are illustrative.
   const html = {
     a: { entry: ['route', 'script'], a: ['route', 'modulepreload'], utils: ['route', 'modulepreload'], callout: ['added', 'modulepreload'], b: ['none', 'not in the HTML'], chart: ['none', 'not in the HTML'] },
     b: { entry: ['route', 'script'], b: ['route', 'modulepreload'], utils: ['route', 'modulepreload'], chart: ['idle', 'prefetch'], a: ['none', 'not in the HTML'], callout: ['none', 'not in the HTML'] },
@@ -583,44 +545,6 @@
       <td class="k">${row[0]}</td>
       ${row.slice(1).map((cell, i) => `<td data-label="${labels[i]}">${cell}</td>`).join('')}
     </tr>`).join('')
-
-  /* Measured runs, on an axis cut between 600 ms and 3.1 s */
-  const x = ms => ms <= 600 ? (ms / 600) * 38 : 46 + ((ms - 3100) / 200) * 54
-  const runs = [
-    {
-      title: 'SSR, component rendered', sub: '/chart renders <LazyHeavyChart />',
-      points: [
-        [372, 'route', 'page interactive (first working click)'],
-        [3200, 'added', 'component chunk arrives'],
-        [3221, 'fg', 'Nuxt ready: app:suspense:resolve, page:finish'],
-      ],
-    },
-    {
-      title: 'SSR, component not rendered', sub: '/stats has v-if="show", closed',
-      points: [
-        [245, 'fg', 'Nuxt ready'],
-        [3191, 'idle', 'prefetched chunk arrives, nothing waited'],
-      ],
-    },
-    {
-      title: 'SPA, component rendered', sub: '/chart with ssr: false',
-      points: [
-        [3167, 'added', 'component chunk arrives'],
-        [3184, 'fg', 'Nuxt ready'],
-        [3210, 'fg', 'first content on screen'],
-        [3260, 'route', 'page interactive'],
-      ],
-    },
-  ]
-  const ticks = [[0, '0'], [200, '200', 'minor'], [400, '400', 'minor'], [600, '600 ms'], [3100, '3.1 s', 'minor'], [3200, '3.2 s', 'minor'], [3300, '3.3 s']]
-  $('runs').innerHTML = runs.map(run => `
-    <div class="run">
-      <div class="run-k">${escape(run.title)}<span class="sub">${escape(run.sub)}</span></div>
-      <div>
-        <div class="run-track"><span class="run-break"></span>${run.points.map(([ms, kind, label]) => `<span class="dot ${kind === 'fg' ? '' : kind}" style="left: ${x(ms)}%" title="${ms} ms: ${escape(label)}"></span>`).join('')}</div>
-        <div class="run-list">${run.points.map(([ms, kind, label]) => `<span><b>${ms.toLocaleString('en')} ms</b><i class="${kind === 'fg' ? '' : kind}"></i>${escape(label)}</span>`).join('')}</div>
-      </div>
-    </div>`).join('') + `<div class="run-axis">${ticks.map(([ms, label, minor]) => `<span${minor ? ' class="minor"' : ''} style="left: ${x(ms)}%">${label}</span>`).join('')}</div>`
 
   /* Current section in the nav */
   const links = [...document.querySelectorAll('.nav a')]

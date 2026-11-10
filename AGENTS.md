@@ -9,8 +9,9 @@ A one-page reference on how a Nuxt bundle loads: the kinds of chunks Vite writes
 
 ## Facts on the page
 
-- Every claim is either measured or labeled as illustrative. The playground timeline is illustrative and says so; the "Measured" runs and the tag counts are real.
+- Every claim is either measured or labeled as illustrative. The playground timeline is illustrative and says so; the tag counts and the source files in the tables are real.
 - Before adding or changing a claim about what Nuxt or the browser does, check it on a real build and write down how. The checks so far used the nuxt-bundle-analyzer playground with Nuxt 4.6.3 and nitropack 2.13.5:
+  - Chunk contents: build with `sourcemap: { client: true }` and read the `sources` of each chunk's `.map`.
   - Tag lists: read every `/_nuxt/` `<script>` and `<link>` of the HTML and match each file to the client manifest (`.nuxt/dist/server/client.manifest.mjs`) to get its kind.
   - Static vs SSR: diff the tags of the prerendered file in `.output/public` against the SSR response of `node .output/server/index.mjs` for the same URL.
   - What waits: put a proxy in front of the server that delays one chunk by 3 s, click a button next to the component every 50 ms in Chromium, and record `app:mounted`, `app:suspense:resolve`, `page:finish` and `onNuxtReady` from a client plugin.
@@ -20,5 +21,5 @@ A one-page reference on how a Nuxt bundle loads: the kinds of chunks Vite writes
 ## Editing
 
 - Keep the page self-contained. Colors come from the CSS variables at the top of the `<style>` block, with a light and a dark set; add colors there, not inline.
-- Data for the interactive parts lives in the `<script>`: `kinds` for the chunk kinds, `states` and `notes` for the playground, `modes` for the Static/SSR/SPA table, `runs` for the measured runs. Titles and counts are computed from that data, so update the data rather than the text.
+- Data for the interactive parts lives in the `<script>`: `kinds` for the chunk kinds, `states` and `notes` for the playground, `modes` for the Static/SSR/SPA table. Titles and counts are computed from that data, so update the data rather than the text.
 - After a change, open the page at 1280 px and 390 px wide, in light and dark, and check that nothing overflows sideways and the console has no errors.
