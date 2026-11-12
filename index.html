@@ -192,7 +192,8 @@
     .table.stack thead { display: none; }
     .table.stack tr { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; border-radius: 12px; box-shadow: inset 0 0 0 1px var(--border); padding: 10px 12px; margin-bottom: 10px; }
     .table.stack td { border: 0; padding: 2px 0; min-width: 0; }
-    .table.stack td.k { grid-column: 1 / -1; padding-bottom: 4px; }
+    .table.stack td.k, .table.stack td[colspan] { grid-column: 1 / -1; }
+    .table.stack td.k { padding-bottom: 4px; }
     .node .tag { font-size: 9px; padding: 0 3px; }
     .table.stack td[data-label]::before { content: attr(data-label); display: block; font-size: 11.5px; color: var(--faint); }
   }
@@ -307,7 +308,7 @@
 
   <section id="load">
     <h2>What the HTML loads, and what it blocks</h2>
-    <p class="intro">With Static or SSR, open a page's source and look at the tags under <code>/_nuxt/</code>. The tag only says when a chunk is fetched. What it blocks depends on the code that imports it.</p>
+    <p class="intro">With Static or SSR, open a page's source and look at the tags under <code>/_nuxt/</code>. The HTML preloads every chunk the page renders up front, so the browser fetches them all in parallel, lazy components included. The tag only says when a chunk is fetched. What it blocks depends on the code that imports it.</p>
     <div class="table stack"><table>
       <thead><tr><th>Chunks</th><th>Tag</th><th>Blocks</th><th>Why</th></tr></thead>
       <tbody>
@@ -320,7 +321,7 @@
         <tr><td class="k"><code>_payload.json</code><span class="sub">Static only</span></td><td data-label="Tag"><code>preload as="fetch"</code></td><td data-label="Blocks"><span class="pill">nothing on first load</span></td><td data-label="Why">The payload is also inlined in the HTML.</td></tr>
       </tbody>
     </table></div>
-    <p class="small" style="margin-top: 12px"><b>Page interactive</b>: Vue has hydrated the page, so its event handlers work. <b>Nuxt ready</b>: the root <code>&lt;Suspense&gt;</code> resolved, so <code>app:suspense:resolve</code>, <code>page:finish</code> and <code>onNuxtReady</code> fire. Code deferred to <code>onNuxtReady</code>, such as <code>useScript</code>, waits for the slowest preloaded chunk.</p>
+    <p class="small" style="margin-top: 12px"><b>Page interactive</b>: the route graph has arrived (entry, layout, page and their shared chunks, not just the entry) and Vue has hydrated the page, so its event handlers work. Each rendered lazy component becomes interactive when its own chunk arrives, and a small one can arrive before the entry. <b>Nuxt ready</b>: after the last of them, the root <code>&lt;Suspense&gt;</code> resolves, so <code>app:suspense:resolve</code>, <code>page:finish</code> and <code>onNuxtReady</code> fire. Code deferred to <code>onNuxtReady</code>, such as <code>useScript</code>, waits for the slowest preloaded chunk.</p>
   </section>
 
   <section id="modes">
@@ -528,8 +529,9 @@
   render()
 
   /* Static, SSR, SPA */
-  // [question, static, ssr, spa]
+  // [question, static, ssr, spa], or [question, the same for all three]
   const modes = [
+    ['When the JS chunks are built', '<code>vite build</code>, at build time, in all three modes. Served as static files from <code>/_nuxt/</code>, usually from a CDN. Only the HTML differs.'],
     ['When the HTML is made', 'Once, at build time', 'On every request', 'Never: every URL gets the same shell'],
     ['First byte', 'A static file, often from a CDN', 'After the server renders', 'Right away'],
     ['Page and layout of the URL', '<code>modulepreload</code>', '<code>modulepreload</code>', 'Fetched after the entry runs'],
@@ -543,7 +545,7 @@
   const labels = ['Static', 'SSR', 'SPA']
   $('vs').querySelector('tbody').innerHTML = modes.map(row => `<tr>
       <td class="k">${row[0]}</td>
-      ${row.slice(1).map((cell, i) => `<td data-label="${labels[i]}">${cell}</td>`).join('')}
+      ${row.length === 2 ? `<td colspan="3" data-label="${labels.join(', ')}">${row[1]}</td>` : row.slice(1).map((cell, i) => `<td data-label="${labels[i]}">${cell}</td>`).join('')}
     </tr>`).join('')
 
   /* Current section in the nav */
