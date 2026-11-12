@@ -140,6 +140,8 @@
   th:last-child { border-top-right-radius: 12px; }
   tr:last-child td { border-bottom: 0; }
   td.k { font-weight: 500; }
+  #load td:nth-child(2) code { white-space: nowrap; overflow-wrap: normal; }
+  #vs td:not(.k) { width: 26%; }
   td .sub { display: block; font-size: 12.5px; color: var(--muted); font-weight: 400; margin-top: 2px; }
   .num { font-variant-numeric: tabular-nums; }
 
@@ -241,7 +243,7 @@
       <dt>Static</dt><dd><code>import x from './x'</code>. The importer can't run until <code>x</code> has loaded, so <code>x</code> blocks it.</dd>
       <dt>Dynamic</dt><dd><code>import('./x')</code>. <code>x</code> loads when the code calls it, and Vite marks its chunk <code>isDynamicEntry</code>. Static and dynamic describe an import, not a chunk.</dd>
       <dt>Shared</dt><dd>Imported statically by several chunks. It loads with its importers and blocks only them: with the entry it's on every page, with a page only on that page, with lazy components only when they load.</dd>
-      <dt>Lazy</dt><dd>Every path from the entry to it crosses an <code>import()</code>. That's every dynamic entry, plus the shared chunks only they import. Only the entry and its static imports aren't lazy.</dd>
+      <dt>Lazy</dt><dd>Every path from the entry to it crosses an <code>import()</code>. That's every dynamic entry, plus the shared chunks only they import. Only the entry and its static imports aren't lazy. People often say "lazy" for any code splitting. Splitting makes the chunks, and lazy says when they can load: the shared chunks with Vue and Vue Router are split out but not lazy.</dd>
     </dl>
     <p class="small" style="margin-top: 12px">Lazy means a chunk can load later, not that it does: the HTML of a URL preloads the lazy chunks that URL needs.</p>
   </section>
@@ -314,7 +316,7 @@
       <tbody>
         <tr><td class="k">Entry and its static imports</td><td data-label="Tag"><code>script</code>, <code>modulepreload</code></td><td data-label="Blocks"><span class="pill wait">page interactive</span></td><td data-label="Why">Nothing runs before the entry.</td></tr>
         <tr><td class="k">Page and layout of the URL<span class="sub">With their static imports</span></td><td data-label="Tag"><code>modulepreload</code></td><td data-label="Blocks"><span class="pill wait">page interactive</span></td><td data-label="Why">The router awaits the page's <code>import()</code> before Nuxt mounts the app, and the page renders inside the layout.</td></tr>
-        <tr><td class="k">Lazy components the page rendered<span class="sub">With their static imports</span></td><td data-label="Tag"><code>modulepreload</code></td><td data-label="Blocks"><span class="pill wait added">Nuxt ready</span></td><td data-label="Why">An async component: the rest of the page hydrates, it stays server HTML until its chunk runs, and the root <code>&lt;Suspense&gt;</code> waits for it.</td></tr>
+        <tr><td class="k">Lazy components the page rendered<span class="sub">With their static imports</span></td><td data-label="Tag"><code>modulepreload</code></td><td data-label="Blocks"><span class="pill wait added">Nuxt ready</span></td><td data-label="Why">An async component: the rest of the page hydrates, it stays server HTML until its chunk runs, and the root <code>&lt;Suspense&gt;</code> waits for it. It doesn't hold up first paint either: the server already put its HTML on the page.</td></tr>
         <tr><td class="k">Lazy components not rendered<span class="sub">Behind <code>v-if</code> or a click</span></td><td data-label="Tag"><code>prefetch</code> or none</td><td data-label="Blocks"><span class="pill">nothing</span></td><td data-label="Why">Fetched when idle, run when shown.</td></tr>
         <tr><td class="k">Other pages</td><td data-label="Tag">None</td><td data-label="Blocks"><span class="pill">nothing</span></td><td data-label="Why">Loaded on navigation.</td></tr>
         <tr><td class="k">CSS of those chunks</td><td data-label="Tag"><code>stylesheet</code>, or inlined in <code>&lt;style&gt;</code></td><td data-label="Blocks"><span class="pill wait">first paint</span></td><td data-label="Why">The browser doesn't paint before the stylesheets in the head load.</td></tr>
@@ -341,7 +343,7 @@
       <div class="rule"><div class="k"><span>03</span>Split what isn't on screen</div><p>Editors, charts, maps, big libraries behind a tab or a click. Then they're only prefetched.</p></div>
       <div class="rule"><div class="k"><span>04</span>Splitting what renders saves nothing</div><p>With Static or SSR it's preloaded anyway, as one more request.</p></div>
       <div class="rule"><div class="k"><span>05</span>Don't over-split tiny components</div><p>Many chunks under 1 kB on one page can cost more in requests than they save in bytes.</p></div>
-      <div class="rule"><div class="k"><span>06</span>Measure the URL, not only the route</div><p>The route of <code>/a</code> is <code>entry.js</code>, <code>a.js</code>, <code>utils.js</code>. The URL also preloads <code>Callout.js</code>. Only the rendered HTML shows it.</p></div>
+      <div class="rule"><div class="k"><span>06</span>Measure the URL, not only the route</div><p>The route of <code>/a</code> is <code>entry.js</code>, <code>a.js</code>, <code>utils.js</code>. The URL also preloads <code>Callout.js</code>. Only the rendered HTML shows it. Compare what the HTML preloads, in bytes and chunks, not load times.</p></div>
     </div>
   </section>
 
@@ -536,11 +538,12 @@
     ['First byte', 'A static file, often from a CDN', 'After the server renders', 'Right away'],
     ['Page and layout of the URL', '<code>modulepreload</code>', '<code>modulepreload</code>', 'Fetched after the entry runs'],
     ['Lazy components the page renders', '<code>modulepreload</code>', '<code>modulepreload</code>', 'Fetched after the chunk that renders them'],
+    ['Rendering a lazy component on the server', 'Once, at build time', 'From the server bundle on disk, with no HTTP request', 'Not rendered on the server'],
     ['Playground <code>/chart</code>, preloaded chunks', '10: entry, 6 shared, layout, page, component', '10: entry, 6 shared, layout, page, component', '5: the entry and 4 shared'],
     ['First paint', 'When the HTML and CSS arrive', 'When the HTML and CSS arrive', 'When every chunk the first render needs has run'],
     ['A rendered lazy component holds up', 'Itself and Nuxt ready', 'Itself and Nuxt ready', 'The whole first render'],
     ['Can differ between visits', 'No: frozen at build', 'Yes: cookies, auth, query, live data', 'Yes: rendered in the browser'],
-    ['What nuxt-bundle-analyzer can measure', 'The URL, from its HTML', 'The URL, by prerendering it in the analyze build', 'The route graph: its HTML only lists the entry'],
+    ['What nuxt-bundle-analyzer can measure', 'The URL, from its HTML', 'The URL, by prerendering it in the analyze build. A page that depends on the request is measured as it renders at build time, and can fail to prerender if a service is missing.', 'The route graph: its HTML only lists the entry'],
   ]
   const labels = ['Static', 'SSR', 'SPA']
   $('vs').querySelector('tbody').innerHTML = modes.map(row => `<tr>
