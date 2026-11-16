@@ -336,13 +336,18 @@
   <section id="rules">
     <h2>Rules of thumb</h2>
     <div class="rules">
-      <div class="rule"><div class="k"><span>01</span>Keep the entry small</div><p>Everything <code>app.vue</code>, plugins and global CSS import statically loads on every page, first.</p></div>
+      <div class="rule"><div class="k"><span>01</span>Keep the entry small</div><p>Everything <code>app.vue</code>, plugins and global CSS import statically is downloaded and run before any page is interactive, on every page.</p></div>
       <div class="rule"><div class="k"><span>02</span>Watch shared chunks</div><p>A big <code>vendor</code> chunk from a <code>codeSplitting</code> group is imported by everything, so every page pays for it.</p></div>
-      <div class="rule"><div class="k"><span>03</span>Split what isn't on screen</div><p>Editors, charts, maps, big libraries behind a tab or a click. Then they're only prefetched.</p></div>
-      <div class="rule"><div class="k"><span>04</span>Splitting what renders saves nothing</div><p>With Static or SSR it's preloaded anyway, as one more request.</p></div>
-      <div class="rule"><div class="k"><span>05</span>Don't over-split tiny components</div><p>Many chunks under 1 kB on one page can cost more in requests than they save in bytes.</p></div>
-      <div class="rule"><div class="k"><span>06</span>Measure the URL, not only the route</div><p>The route of <code>/a</code> is <code>entry.js</code>, <code>a.js</code>, <code>utils.js</code>. The URL also preloads <code>Callout.js</code>. Only the rendered HTML shows it.</p></div>
+      <div class="rule"><div class="k"><span>03</span>Split what may never be used</div><p>Editors, charts, maps, big libraries behind a tab, a click or a <code>v-if</code>. They're only prefetched and don't run until shown. A closed <code>&lt;LazyHeavyChart v-if&gt;</code> made <code>/chart</code> interactive at 1.8 s, against 2.4 s with a static import.</p></div>
+      <div class="rule"><div class="k"><span>04</span>Splitting what renders moves its cost</div><p>With Static or SSR, it's still preloaded and run, as one more request, but the rest of the page stops waiting for it. With <code>&lt;LazyHeavyChart&gt;</code> rendered, <code>/chart</code> was interactive at 1.9 s and the chart at 2.3 s.</p></div>
+      <div class="rule"><div class="k"><span>05</span>Bytes cost more than parsing</div><p>The chart chunk, 57 kB gzipped, added less than 10 ms of main-thread script time: Chromium parsed most of it on a background thread. Main-thread time comes from the code that runs, so check scripting time in a trace before splitting for it.</p></div>
+      <div class="rule"><div class="k"><span>06</span>Don't over-split tiny components</div><p>Many chunks under 1 kB on one page can cost more in requests than they save in bytes.</p></div>
+      <div class="rule"><div class="k"><span>07</span>A dynamic import in a library is a waterfall</div><p>Nuxt preloads the pages and components a URL rendered, not other <code>import()</code>. When a markdown parser's <code>import('yaml')</code> runs during render, the request starts after the page chunk runs and the page waits for it: interactive at 2.3 s, against 2.1 s with a static import.</p></div>
+      <div class="rule"><div class="k"><span>08</span>Split a library's optional parts</div><p>The waterfall pays off when most inputs skip the code. Without frontmatter, the <code>import()</code> version never loaded <code>yaml</code>, 30 kB gzipped. The static version preloaded it on every page that used the parser.</p></div>
+      <div class="rule"><div class="k"><span>09</span>Don't redo on the client what the server did</div><p>Parsed in <code>useAsyncData</code>, the result came in the payload, the client never called the parser and never loaded <code>yaml</code>. The page was interactive at 1.7 s.</p></div>
+      <div class="rule"><div class="k"><span>10</span>Measure the URL, not only the route</div><p>The route of <code>/a</code> is <code>entry.js</code>, <code>a.js</code>, <code>utils.js</code>. The URL also preloads <code>Callout.js</code>. Only the rendered HTML shows it.</p></div>
     </div>
+    <p class="small" style="margin-top: 12px">Timings: cold loads of the playground's SSR build in Chromium, with a 4x CPU slowdown, 150 ms latency and 1.6 Mbit/s, median of 5. Interactive is when a click on a button in the page first runs its handler.</p>
   </section>
 
   <footer>Measured on the nuxt-bundle-analyzer playground (Nuxt 4.6.3, nitropack 2.13.5, Chromium). The timeline in the Playground section is illustrative.</footer>
