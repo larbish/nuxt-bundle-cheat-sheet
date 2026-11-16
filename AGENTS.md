@@ -15,6 +15,8 @@ A one-page reference on how a Nuxt bundle loads: the kinds of chunks Vite writes
   - Tag lists: read every `/_nuxt/` `<script>` and `<link>` of the HTML and match each file to the client manifest (`.nuxt/dist/server/client.manifest.mjs`) to get its kind.
   - Static vs SSR: diff the tags of the prerendered file in `.output/public` against the SSR response of `node .output/server/index.mjs` for the same URL.
   - What waits: put a proxy in front of the server that delays one chunk by 3 s, click a button next to the component every 50 ms in Chromium, and record `app:mounted`, `app:suspense:resolve`, `page:finish` and `onNuxtReady` from a client plugin.
+  - Load and main-thread time: build `/chart` with `<HeavyChart>`, `<LazyHeavyChart>` and a closed `<LazyHeavyChart v-if>`, load each cold 5 times with a 4x CPU slowdown, 150 ms latency and 1.6 Mbit/s, and record the first handled click, CDP's `ScriptDuration` and the V8 parse events of a trace.
+  - Library `import()`: add a markdown parser to `node_modules` that runs `import('yaml')` only for frontmatter, call it from pages in `<script setup>` and in `useAsyncData`, compare with a copy that imports `yaml` statically, and diff their tags and requests.
 - Wording: "static" and "dynamic" describe an import, not a chunk. "Lazy" means every path from the entry crosses an `import()`, as defined in the "Kinds of chunks" section. Chunks a URL loads beyond its route are the lazy components the page rendered.
 - Examples use the playground only. Say each thing once: don't restate a table's content in another section.
 
